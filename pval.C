@@ -1,0 +1,330 @@
+#include "TROOT.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TGraph.h"
+#include <stdio.h>
+#include "TFile.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "pf.h"
+
+int fcmp(const void *in1, const void *in2);
+int main(){
+
+  // all input files = output of cover2.C, profile distribution of toy MC with 1/T=0
+  TChain *mc = new TChain("toyMC");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2.root");
+/*  mc->Add("../../ana/legend_gerda_mjd/output_cover2_0.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_1.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_2.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_3.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_4.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_5.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_6.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_7.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_8.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_9.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_10.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_11.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_12.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_13.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_14.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_15.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_16.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_17.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_18.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_19.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_20.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_21.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_22.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_23.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_24.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_25.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_26.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_27.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_28.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_29.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_30.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_31.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_32.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_33.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_34.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_35.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_36.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_37.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_38.root");
+  mc->Add("../../ana/legend_gerda_mjd/output_cover2_39.root");
+*/
+  Int_t dim=200;
+  Double_t *ta[dim];
+  Double_t x[dim];
+  Int_t    ne[dim];
+
+  
+  Double_t xinv, pval;
+  mc->SetBranchAddress("invT12",&xinv);
+  mc->SetBranchAddress("t",&pval);
+
+  Double_t binwidth=get_binwidth();
+  Double_t offset=binwidth/10.;
+  double maxinv = dim*binwidth;
+  int nbins = (maxinv+1.e-6)/binwidth;
+  
+  TH2F  *ht  = new TH2F("t","t",nbins+1,-binwidth/2.,maxinv+0.5*binwidth,2000,0.,20.);
+  TH1F  *hlim  = new TH1F("lim","lim",nbins+1,-binwidth/2.,maxinv+0.5*binwidth);
+  TH1F  *hlim_1s  = new TH1F("lim_1s","lim_1s",nbins+1,-binwidth/2.,maxinv+0.5*binwidth);
+  
+  for(Int_t i=0; i<dim; i++) x[i]=i*binwidth+offset;
+  for(Int_t i=0; i<dim; i++) ne[i]=0;
+
+  Int_t tot = mc->GetEntries();
+  
+  for(Int_t i=0; i<dim; i++) {
+    ta[i] = (Double_t*) malloc(sizeof(Double_t)*tot/3);
+    if(!ta[i]) printf("malloc failed\n");
+  }
+  
+
+  // reading in the test statistic from cover2.C output
+  // profile t distribution for all toy MC spectra
+  int ibin;
+  for(int i=0; i<mc->GetEntries(); i++) {
+    mc->GetEntry(i);
+    ibin = fabs(xinv)/binwidth;
+    if(ibin>=dim) ibin=dim-1;
+    *(ta[ibin] + ne[ibin]) = pval;
+    ne[ibin]++;
+    if(ne[ibin]>=tot/3) printf(" dimension too small %d %d\n",i,tot/3);
+    ht->Fill(fabs(xinv),pval);
+  }
+
+
+  // now sort for every 1/T  the  profile likelihood values using qsort
+  // find the 90% quantile and store in histogram  hlim
+  int nonzero=0;
+  for(int i=0; i<=ibin;i++)
+    {
+      if(ne[i]==0) continue;
+      nonzero++;
+      printf("sorting %d %d\n",i,ne[i]);
+      qsort((void *) ta[i], ne[i], sizeof(double), fcmp);
+
+      int i50 = ne[i]*0.5-0.5;
+      int i10 = ne[i]*0.1-0.5;
+      int i90 = ne[i]*0.9-0.5;
+      int i68 = ne[i]*0.68-0.5;
+      hlim->Fill(i*binwidth+1e-6, *(ta[i]+i90));
+      hlim_1s->Fill(i*binwidth+1e-6, *(ta[i]+i68));
+      printf("%d values 0.1 %f  0.5 %f  0.9 %f\n",
+	     i,*(ta[i]+i10),*(ta[i]+i50),*(ta[i]+i90));
+    }
+  mc->Delete();
+
+  // stop after sorting the test statistic distr ???
+  if(0) {
+    TFile *fout = new TFile("../../ana/legend_gerda_mjd/pval-ph2-tmp.root","RECREATE");
+    hlim->Write();
+    hlim_1s->Write();
+    fout->Write();
+    return 0;
+  }
+
+  
+  // now read in test statistic for MC event generated
+  // with 1/T=0 using sensit3.C for estimating sensitivity for limit setting
+  TChain *mc2 = new TChain("toyMC");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3.root");
+  //mc2->Add("pvalue-1.root");
+/*  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_0.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_2.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_2.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_3.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_4.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_5.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_6.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_7.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_8.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_9.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_10.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_11.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_12.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_13.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_14.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_15.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_16.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_17.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_18.root");
+  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_19.root");
+*/
+  //  mc2->Add("sensit3_nosys2.root");
+  //  mc2->Add("sensit3_nosys3.root");
+  //  mc2->Add("sensit3_nosys4.root");
+  mc2->SetBranchAddress("invT12",&xinv);
+  mc2->SetBranchAddress("t",&pval);
+
+  tot = mc2->GetEntries();
+  Int_t maxd=tot/nonzero;  // max dimension for the array
+  maxd =maxd*3/2;
+  
+  printf(" total entries %d, malloc size %d \n",tot,maxd);
+  
+  Double_t  *pv[dim];
+  for(Int_t i=0; i<dim; i++) {
+    pv[i]=0;
+    if(ne[i]==0) continue;
+    pv[i] = (Double_t*) malloc(sizeof(double)*maxd);
+    if(!pv[i]) {printf("malloc failed\n"); return 1;}
+    printf("malloc worked for %d  %d address \n",i,maxd);
+  }
+  Int_t nv[dim];
+  for(Int_t i=0;i<dim; i++) nv[i]=0;
+
+  TH2F* tfcn = new TH2F("fcn","fcn no signal",100,0,100*binwidth,20000,0.,20.);
+  TH2F* hpvalue = new TH2F("pvalue","pvalue no signal",100,0,100*binwidth,1000,0.,1.);
+  
+  // read in for all spectra generated by sensit3  the profile distribution
+  for(int i=0; i<tot; i++) {
+    mc2->GetEntry(i);
+    Int_t ibin = xinv/binwidth;
+    Int_t j;
+    if(ibin<0) continue; // s.th. wrong in file --> skip
+    if(ibin>=dim) continue; // s.th. wrong in file --> skip
+
+    if(ne[ibin]==0 || pv[ibin]==0) continue; //some bins skipped in simu
+    if(nv[ibin]>=maxd) {printf(" maxd reached %d \n",maxd); break;}
+
+    for(j=0;j<ne[ibin];j++) if(pval <= *(ta[ibin]+j) ) break;
+    double pvalue = 1.-(double)j / (double)ne[ibin];
+
+    *(pv[ibin]+nv[ibin])=pvalue;
+    nv[ibin]++;
+    
+    if(ibin<100) tfcn->Fill(xinv,pval);
+    if(ibin<100) hpvalue->Fill(xinv,pvalue);
+
+    if(i%10000==1) printf("%d  x %f ibin %d  pvalue %f \n",i,xinv,ibin,pvalue);
+
+    //    if(ibin==17) printf("%d: t %f  pvalue %f  %d \n",i,pval,pvalue,j);
+  }
+
+  printf("finish reading in %d spectra\n",nv[0]);
+
+  
+  double xaxis[dim];
+  double y05[dim];
+  double y16[dim];
+  double y50[dim];
+  double y84[dim];
+  double y95[dim];
+  
+  int Nb=0;
+
+
+  // sort the profile distribution for every 1/T and find 1sigma and 2sigma quantiles
+  for(int i=0; i<dim;i++)
+    {
+      if(nv[i]==0) continue;
+      printf("sorting pvalues for bin %d  entries %d  x=%f\n",i,nv[i],x[i]);
+      qsort( (void *)pv[i], nv[i], sizeof(double), fcmp);
+
+      xaxis[Nb] = x[i] ;
+
+      int quantile; 
+      quantile = (int) (0.05*nv[i]-0.5) ;
+      y05[Nb] = *(pv[i]+quantile) ; 
+      quantile = (int) (0.16*nv[i]-0.5) ;
+      y16[Nb] = *(pv[i]+quantile) ; 
+      quantile = (int) (0.50*nv[i]-0.5) ;
+      y50[Nb] = *(pv[i]+quantile) ; 
+      quantile = (int) (0.84*nv[i]-0.5) ;
+      y84[Nb] = *(pv[i]+quantile) ; 
+      quantile = (int) (0.95*nv[i]-0.5) ;
+      y95[Nb] = *(pv[i]+quantile) ; 
+      Nb++;
+      if(Nb>dim) break;
+    }
+
+  mc2->Delete();
+
+  //
+  // now read in test statistic distribution for data, output of t12limit program
+  // 
+  TChain *mc3 = new TChain("toyMC");
+  //mc3->Add("t12limit-all.root");
+  mc3->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/t12limit-tmp.root");
+  mc3->SetBranchAddress("invT12",&xinv);
+  mc3->SetBranchAddress("t",&pval);
+
+  TH1F *fcndata = new TH1F("fcndata","fcn data",100,0.,100*binwidth);
+  
+  Nb=0;
+  double dat[dim];
+  tot = mc3->GetEntries();
+  printf("for data %d entries in ntuple\n",tot);
+  // convert profile likelihood value to  pvalue
+  // relative to toyMC distribution of  profile likelihood values for every 1/T 
+  for(int i=0; i<mc3->GetEntries(); i++) {
+    mc3->GetEntry(i);
+    Int_t ibin = xinv/binwidth;
+    Int_t j;
+    if(ne[ibin]==0) continue;
+    // ta is sorted 2-dim array of toyMC profile likelihood values
+    for(j=0;j<ne[ibin];j++) if(pval<=*(ta[ibin]+j) ) break;
+    double pvalue = 1.-(double)j / (double)ne[ibin];
+    dat[Nb++]=pvalue;
+    if(ibin<100) fcndata->SetBinContent(ibin+1,pval);
+    printf("data: %d  x %f ibin %d  pvalue %f \n",i,xinv,ibin,pvalue);
+  }
+  
+
+  
+  // store all distributions as TGraphs in file
+  
+  TFile *fout = new TFile("pval.root","RECREATE");
+
+  TGraph *gr05 = new TGraph(Nb,xaxis,y05);
+  gr05->SetName("g05");
+  gr05->SetTitle("g05");
+  gr05->Write();
+  TGraph *gr16 = new TGraph(Nb,xaxis,y16);
+  gr16->SetName("g16");
+  gr16->SetTitle("g16");
+  gr16->Write();
+  TGraph *gr50 = new TGraph(Nb,xaxis,y50);
+  gr50->SetName("g50");
+  gr50->SetTitle("g50");
+  gr50->Write();
+  TGraph *gr84 = new TGraph(Nb,xaxis,y84);
+  gr84->SetName("g84");
+  gr84->SetTitle("g84");
+  gr84->Write();
+  TGraph *gr95 = new TGraph(Nb,xaxis,y95);
+  gr95->SetName("g95");
+  gr95->SetTitle("g95");
+  gr95->Write();
+  TGraph *grdata = new TGraph(Nb,xaxis,dat);
+  grdata->SetName("data");
+  grdata->SetTitle("data");
+  grdata->Write();
+
+  fcndata->Write();
+  tfcn->Write();
+  hpvalue->Write();
+  ht->Write();
+  hlim->Write();
+  
+  fout->Write();
+  fout->Close();
+
+  //  gr95->Draw();
+  //gr50->Draw("same");
+  //gr05->Draw("same");
+}
+
+int fcmp(const void *in1, const void *in2) {
+  double *d1 = (double *) in1;
+  double *d2 = (double *) in2;
+  if(*(d1) < * (d2) ) return -1;
+  else if (*(d1) > * (d2) ) return 1;
+  return 0;
+}
