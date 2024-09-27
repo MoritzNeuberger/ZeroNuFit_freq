@@ -13,48 +13,8 @@ int main(){
 
   // all input files = output of cover2.C, profile distribution of toy MC with 1/T=0
   TChain *mc = new TChain("toyMC");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2.root");
-/*  mc->Add("../../ana/legend_gerda_mjd/output_cover2_0.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_1.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_2.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_3.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_4.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_5.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_6.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_7.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_8.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_9.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_10.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_11.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_12.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_13.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_14.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_15.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_16.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_17.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_18.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_19.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_20.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_21.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_22.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_23.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_24.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_25.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_26.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_27.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_28.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_29.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_30.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_31.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_32.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_33.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_34.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_35.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_36.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_37.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_38.root");
-  mc->Add("../../ana/legend_gerda_mjd/output_cover2_39.root");
-*/
+  mc->Add("./out/output_cover2.root");
+
   Int_t dim=200;
   Double_t *ta[dim];
   Double_t x[dim];
@@ -122,7 +82,7 @@ int main(){
 
   // stop after sorting the test statistic distr ???
   if(0) {
-    TFile *fout = new TFile("../../ana/legend_gerda_mjd/pval-ph2-tmp.root","RECREATE");
+    TFile *fout = new TFile("./out/pval-ph2-tmp.root","RECREATE");
     hlim->Write();
     hlim_1s->Write();
     fout->Write();
@@ -133,32 +93,7 @@ int main(){
   // now read in test statistic for MC event generated
   // with 1/T=0 using sensit3.C for estimating sensitivity for limit setting
   TChain *mc2 = new TChain("toyMC");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3.root");
-  //mc2->Add("pvalue-1.root");
-/*  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_0.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_2.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_2.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_3.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_4.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_5.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_6.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_7.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_8.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_9.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_10.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_11.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_12.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_13.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_14.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_15.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_16.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_17.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_18.root");
-  mc2->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_sensit3_19.root");
-*/
-  //  mc2->Add("sensit3_nosys2.root");
-  //  mc2->Add("sensit3_nosys3.root");
-  //  mc2->Add("sensit3_nosys4.root");
+  mc2->Add("./out/output_sensit3.root");
   mc2->SetBranchAddress("invT12",&xinv);
   mc2->SetBranchAddress("t",&pval);
 
@@ -250,8 +185,7 @@ int main(){
   // now read in test statistic distribution for data, output of t12limit program
   // 
   TChain *mc3 = new TChain("toyMC");
-  //mc3->Add("t12limit-all.root");
-  mc3->Add("/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/t12limit-tmp.root");
+  mc3->Add("./out/t12limit-tmp.root");
   mc3->SetBranchAddress("invT12",&xinv);
   mc3->SetBranchAddress("t",&pval);
 
@@ -280,7 +214,7 @@ int main(){
   
   // store all distributions as TGraphs in file
   
-  TFile *fout = new TFile("pval.root","RECREATE");
+  TFile *fout = new TFile("./out/pval.root","RECREATE");
 
   TGraph *gr05 = new TGraph(Nb,xaxis,y05);
   gr05->SetName("g05");

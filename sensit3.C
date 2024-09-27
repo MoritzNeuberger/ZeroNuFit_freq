@@ -73,7 +73,7 @@ main(int argc, char **argv)
   char bparameter[200];  // background index
   sprintf(bparameter,"%s/bkg.txt",dirname);
   char rparameter[200];  // input root file for 90% cut histogram
-  sprintf(rparameter,"/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_cover2.root");
+  sprintf(rparameter,"./out/output_cover2.root");
 //  rparameter="/mnt/atlas01/users/neuberger/L200_stat_analysis/bernhards_stat_tool/ana/legend_gerda_mjd/output_cover2.root"  
 
   i = initfit(0,fparameter,bparameter,7,rparameter);  // arguments: debug, file_name, bit_pattern_systematic

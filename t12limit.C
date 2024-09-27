@@ -43,7 +43,7 @@ main(int argc, char **argv)
   double binwidth=get_binwidth();
   int nbins=(maxinv+1e-7)/binwidth;
   
-  TFile *fout = new TFile("../../ana/legend_gerda_mjd/t12limit-tmp.root","RECREATE");
+  TFile *fout = new TFile("./out/t12limit-tmp.root","RECREATE");
 
   TH1F  *hlim  = new TH1F("dlim","dlim",nbins+1,-binwidth/2.,(nbins+0.5)*binwidth);
 
@@ -54,11 +54,11 @@ main(int argc, char **argv)
   
 
 
-  i = initfit(2,"../../data_sets/legend_gerda_mjd/parameter.txt","../../data_sets/legend_gerda_mjd/bkg.txt",7,"../../ana/legend_gerda_mjd/pval-ph2-tmp.root");  // init MINUIT
+  i = initfit(2,"./in/parameter.txt","./in/bkg.txt",7,"./out/pval-ph2-tmp.root");  // init MINUIT
 
   if(i) exit(1);
 
-  sprintf(fn,"../../data_sets/legend_gerda_mjd/events.txt");
+  sprintf(fn,"./in/events.txt");
   // sprintf(fn,"events_ph2.txt");
   i = read_data(fn);  // read in event list
   if(i) exit(1);
